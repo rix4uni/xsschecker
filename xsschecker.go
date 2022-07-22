@@ -14,7 +14,7 @@ func main(){
 
 	colorReset := "\033[0m"
 	colorRed := "\033[31m"
-    colorGreen := "\033[32m"
+	colorGreen := "\033[32m"
 
 	const banner = `
  _  _  ___  ___   ___  _   _  ____  ___  _  _  ____  ____ 
