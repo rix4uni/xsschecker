@@ -11,14 +11,20 @@ import (
 )
 
 func main(){
-	// fmt.Println("\n")
-	fmt.Println("frequester tool By tojojo !!")
-	fmt.Println("\\__(-_-)__/")
-	// fmt.Println("\n")
 
 	colorReset := "\033[0m"
 	colorRed := "\033[31m"
-  	// colorGreen := "\033[32m"
+    colorGreen := "\033[32m"
+
+	const banner = `
+ _  _  ___  ___   ___  _   _  ____  ___  _  _  ____  ____ 
+( \/ )/ __)/ __) / __)( )_( )( ___)/ __)( )/ )( ___)(  _ \
+ )  ( \__ \\__ \( (__  ) _ (  )__)( (__  )  (  )__)  )   /
+(_/\_)(___/(___/ \___)(_) (_)(____)\___)(_)\_)(____)(_)\_)
+v0.1 				coded by @rix4uni in INDIA
+`
+
+	fmt.Println(colorGreen,banner,colorReset)
 
 
 	sc := bufio.NewScanner(os.Stdin)
