@@ -51,7 +51,7 @@ v0.1 				coded by @rix4uni in INDIA
 	   			check_result1 := strings.Contains(sb , "prompt(1)")
 	   			check_result2 := strings.Contains(sb , "confirm(1)")
 	   			check_result3 := strings.Contains(sb , "alert(1)")
-	   			// fmt.Println(check_result)
+	   			
 	   			if check_result1 != false {
 	   				fmt.Println(string(colorRed),"Vulnerable To XSS:", domain,string(colorReset))
 	   			}else if check_result2 != false {
