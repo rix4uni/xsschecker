@@ -39,4 +39,5 @@ waybackurls testphp.vulnweb.com | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*
 
 gospider
 ```bash
-gospider -s "https://footlocker.com" -c 10 -d 5 -t 100 --other-source | grep -e "code-200" | awk '{print $5}'| kxss | grep "=" | sed 's/=.*/=/' | uro
+gospider -s "https://footlocker.com" -c 10 -d 5 -t 100 --other-source | tr " " "\n" | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*/=/' | uro
+```
