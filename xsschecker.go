@@ -12,10 +12,6 @@ import (
 
 func main(){
 
-	colorReset := "\033[0m"
-	colorRed := "\033[31m"
-	colorGreen := "\033[32m"
-
 	const banner = `
  _  _  ___  ___   ___  _   _  ____  ___  _  _  ____  ____ 
 ( \/ )/ __)/ __) / __)( )_( )( ___)/ __)( )/ )( ___)(  _ \
@@ -24,8 +20,7 @@ func main(){
 v0.1 				coded by @rix4uni in INDIA
 `
 
-	fmt.Println(colorGreen,banner,colorReset)
-
+	fmt.Println("\033[0;33m",banner,"\033[0;0m")
 
 	sc := bufio.NewScanner(os.Stdin)
 
@@ -53,27 +48,22 @@ v0.1 				coded by @rix4uni in INDIA
 	   			check_result3 := strings.Contains(sb , "alert(1)")
 	   			
 	   			if check_result1 != false {
-	   				fmt.Println(string(colorRed),"Vulnerable To XSS:", domain,string(colorReset))
+	   				fmt.Println("\033[1;31mVulnerable: "+domain+"\033[0;0m")
 	   			}else if check_result2 != false {
-	   				fmt.Println(string(colorRed),"Vulnerable To XSS:", domain,string(colorReset))
+	   				fmt.Println("\033[1;31mVulnerable: "+domain+"\033[0;0m")
 	   			}else if check_result3 != false {
-	   				fmt.Println(string(colorRed),"Vulnerable To XSS:", domain,string(colorReset))
+	   				fmt.Println("\033[1;31mVulnerable: "+domain+"\033[0;0m")
 				}else {
-					fmt.Println(string(colorGreen),"Not Vulnerable To XSS:", domain, string(colorReset))
+					fmt.Println("\033[1;30mNot Vulnerable: "+domain+"\033[0;0m")
 				}
 			}
-			
    		}()
-
 	}
-
-
 
 	for sc.Scan(){
 		domain := sc.Text()
 		jobs <- domain		
-		
-
+	
 	}
 	close(jobs)
 	wg.Wait()
