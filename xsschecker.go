@@ -12,16 +12,6 @@ import (
 
 func main(){
 
-	const banner = `
- _  _  ___  ___   ___  _   _  ____  ___  _  _  ____  ____ 
-( \/ )/ __)/ __) / __)( )_( )( ___)/ __)( )/ )( ___)(  _ \
- )  ( \__ \\__ \( (__  ) _ (  )__)( (__  )  (  )__)  )   /
-(_/\_)(___/(___/ \___)(_) (_)(____)\___)(_)\_)(____)(_)\_)
-v0.1 				coded by @rix4uni in INDIA
-`
-
-	fmt.Println("\033[0;33m",banner,"\033[0;0m")
-
 	sc := bufio.NewScanner(os.Stdin)
 
 	jobs := make(chan string)
