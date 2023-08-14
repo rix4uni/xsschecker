@@ -11,12 +11,34 @@ import (
 	"sync"
 )
 
+func printUsage() {
+	fmt.Println("Usage: xsschecker [OPTIONS]")
+	fmt.Println("\nOptions:")
+	flag.PrintDefaults()
+}
+
 func main() {
 
-	// Define the flags
-	matchString := flag.String("match", "", "String to match against the domain response")
-	onlyVulnerable := flag.Bool("vuln", false, "Print only vulnerable URLs if set")
-	flag.Parse()
+	// Suppress the default error output of the flag package
+	flag.CommandLine.Usage = func() {}
+
+	// Define the flags with clearer descriptions
+	matchString := flag.String("match", "", "The string to match against the domain response. (required)")
+	onlyVulnerable := flag.Bool("vuln", false, "If set, only vulnerable URLs will be printed.")
+
+	// Custom flag parsing to handle unknown flags
+	flag.CommandLine.Init(os.Args[0], flag.ContinueOnError)
+	err := flag.CommandLine.Parse(os.Args[1:])
+	if err != nil {
+		printUsage()
+		return
+	}
+
+	// If no flags are provided or required flags are missing, print usage and exit.
+	if len(os.Args) == 1 {
+		printUsage()
+		return
+	}
 
 	if *matchString == "" {
 		fmt.Println("Please provide a match string using the -match flag.")
