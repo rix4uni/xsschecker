@@ -32,7 +32,7 @@ Options:
 ```
 cat subs.txt | waybackurls >> waybackurls-urls.txt
 cat subs.txt | gau >> gau-urls.txt
-cat subs.txt | hakrawler -scope >> hakrawler-urls.txt
+cat live-subs.txt | hakrawler -scope >> hakrawler-urls.txt
 cat waybackurls-urls.txt gau-urls.txt hakrawler-urls.txt | anew -q urls.txt
 
 cat urls.txt | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>'
