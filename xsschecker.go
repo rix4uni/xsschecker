@@ -23,7 +23,7 @@ func main() {
 	flag.CommandLine.Usage = func() {}
 
 	// Define the flags with clearer descriptions
-	matchString := flag.String("match", "", "The string to match against the domain response. (required)")
+	matchString := flag.String("match", "", "The string(s) to match against the domain response. Separate multiple strings with commas. (required)")
 	onlyVulnerable := flag.Bool("vuln", false, "If set, only vulnerable URLs will be printed.")
 
 	// Custom flag parsing to handle unknown flags
@@ -44,6 +44,8 @@ func main() {
 		fmt.Println("Please provide a match string using the -match flag.")
 		return
 	}
+
+	matchStrings := strings.Split(*matchString, ", ")
 
 	sc := bufio.NewScanner(os.Stdin)
 
@@ -67,7 +69,13 @@ func main() {
 				}
 				sb := string(body)
 
-				isVulnerable := strings.Contains(sb, *matchString)
+				isVulnerable := false
+				for _, str := range matchStrings {
+					if strings.Contains(sb, str) {
+						isVulnerable = true
+						break
+					}
+				}
 
 				if isVulnerable {
 					fmt.Println("\033[1;31mVulnerable: " + domain + "\033[0;0m")
