@@ -139,11 +139,12 @@ func main() {
 					}
 
 					status := fmt.Sprintf("[%d] ", resp.StatusCode)
+					server := resp.Header.Get("Server")
 					outputStr := ""
 					if isVulnerable {
-						outputStr = fmt.Sprintf("\033[1;31mVulnerable: %s%s\033[0;0m\n", status, domain)
+						outputStr = fmt.Sprintf("\033[1;31mVulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
 					} else if !*onlyVulnerable { // If onlyVulnerable is false, print non-vulnerable URLs
-						outputStr = fmt.Sprintf("\033[1;35mNot Vulnerable: %s%s\033[0;0m\n", status, domain)
+						outputStr = fmt.Sprintf("\033[1;35mNot Vulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
 					}
 
 					fmt.Print(outputStr)
