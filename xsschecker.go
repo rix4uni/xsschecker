@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -35,6 +36,9 @@ func main() {
 	proxy := flag.String("proxy", "", "Proxy server for HTTP requests.")
 	inputFile := flag.String("i", "", "Input file containing list of URLs.")
 	singleURL := flag.String("u", "", "Single URL to test.")
+	skipStatusCodes := flag.String("ssc", "", "Comma-separated status codes to skip all URLs from a domain if encountered (e.g., 403,500).")
+	maxStatusCodeSkips := flag.Int("maxssc", 2, "Maximum number of status code responses required before skipping all URLs from that domain.")
+	skipServer := flag.String("scdn", "", "Server name to skip all URLs for (e.g., cloudflare).")
 
 	// Custom flag parsing to handle unknown flags
 	flag.CommandLine.Init(os.Args[0], flag.ContinueOnError)
@@ -56,6 +60,17 @@ func main() {
 	}
 
 	matchStrings := strings.Split(*matchString, ", ")
+	skipStatusCodeList := make(map[int]bool)
+	if *skipStatusCodes != "" {
+		for _, codeStr := range strings.Split(*skipStatusCodes, ",") {
+			code, err := strconv.Atoi(codeStr)
+			if err != nil {
+				fmt.Printf("Invalid status code: %s\n", codeStr)
+				return
+			}
+			skipStatusCodeList[code] = true
+		}
+	}
 
 	sc := bufio.NewScanner(os.Stdin)
 
@@ -97,11 +112,32 @@ func main() {
 		defer output.Close()
 	}
 
+	skippedDomains := make(map[string]int)
+	skippedDomainsLimitReached := make(map[string]bool)
+	var skippedDomainsLock sync.Mutex
+
 	for i := 0; i < *threads; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			for domain := range jobs {
+				urlParsed, err := url.Parse(domain)
+				if err != nil {
+					if *verbose {
+						fmt.Println("Error parsing URL:", err)
+					}
+					continue
+				}
+				host := urlParsed.Host
+
+				// Check if the domain should be skipped
+				skippedDomainsLock.Lock()
+				if skippedDomainsLimitReached[host] {
+					skippedDomainsLock.Unlock()
+					continue
+				}
+				skippedDomainsLock.Unlock()
+
 				for attempt := 0; attempt < *retries; attempt++ {
 					req, err := http.NewRequest("GET", domain, nil)
 					if err != nil {
@@ -150,6 +186,18 @@ func main() {
 					fmt.Print(outputStr)
 					if output != nil {
 						output.WriteString(outputStr)
+					}
+
+					// Check if the response meets the skip criteria
+					if *skipStatusCodes != "" && skipStatusCodeList[resp.StatusCode] && strings.Contains(strings.ToLower(server), strings.ToLower(*skipServer)) {
+						skippedDomainsLock.Lock()
+						skippedDomains[host]++
+						if skippedDomains[host] >= *maxStatusCodeSkips {
+							skippedDomainsLimitReached[host] = true
+							fmt.Printf("Skipped all URLs of this domain %s [ERR: Blocked by %s]\n", host, *skipServer)
+						}
+						skippedDomainsLock.Unlock()
+						break // Exit retry loop on skip condition met
 					}
 					break // Exit retry loop on successful request
 				}
