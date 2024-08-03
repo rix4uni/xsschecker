@@ -14,7 +14,7 @@ go install github.com/rix4uni/xsschecker@latest
 or
 
 ```
-git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build xsschecker.go && mv xsschecker /usr/bin/
+git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build xsschecker.go && mv xsschecker ~/go/bin/xsschecker
 ```
 ## Usage
 ```
