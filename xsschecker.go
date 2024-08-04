@@ -14,10 +14,16 @@ import (
 	"time"
 )
 
+const version = "0.0.3"
+
 func printUsage() {
 	fmt.Println("Usage: xsschecker [OPTIONS]")
 	fmt.Println("\nOptions:")
 	flag.PrintDefaults()
+}
+
+func printVersion() {
+	fmt.Printf("xsschecker version %s\n", version)
 }
 
 func main() {
@@ -25,10 +31,13 @@ func main() {
 	flag.CommandLine.Usage = func() {}
 
 	// Define the flags with clearer descriptions
+	versionFlag := flag.Bool("version", false, "Print the version of the tool and exit.")
 	matchString := flag.String("match", "alert(1), confirm(1), prompt(1)", "The string(s) to match against the domain response. Separate multiple strings with commas. (required)")
 	onlyVulnerable := flag.Bool("vuln", false, "If set, only vulnerable URLs will be printed.")
 	timeout := flag.Int("timeout", 15, "Timeout for HTTP requests in seconds.")
 	outputFile := flag.String("o", "", "File to save the output.")
+	appendOutput := flag.String("ao", "", "File to append the output instead of overwriting.")
+	noColor := flag.Bool("nc", false, "Do not use colored output.")
 	threads := flag.Int("t", 20, "Number of concurrent threads.")
 	userAgent := flag.String("H", "XSSChecker/1.0", "Custom User-Agent header for HTTP requests.")
 	verbose := flag.Bool("v", false, "Enable verbose output for debugging purposes.")
@@ -38,13 +47,19 @@ func main() {
 	singleURL := flag.String("u", "", "Single URL to test.")
 	skipStatusCodes := flag.String("ssc", "", "Comma-separated status codes to skip all URLs from a domain if encountered (e.g., 403,500).")
 	maxStatusCodeSkips := flag.Int("maxssc", 2, "Maximum number of status code responses required before skipping all URLs from that domain.")
-	skipServer := flag.String("scdn", "", "Server name to skip all URLs for (e.g., cloudflare).")
+	skipServer := flag.String("scdn", "", "Server name to skip all URLs for (e.g., cloudflare.)")
 
 	// Custom flag parsing to handle unknown flags
 	flag.CommandLine.Init(os.Args[0], flag.ContinueOnError)
 	err := flag.CommandLine.Parse(os.Args[1:])
 	if err != nil {
 		printUsage()
+		return
+	}
+
+	// Print version and exit if --version flag is provided
+	if *versionFlag {
+		printVersion()
 		return
 	}
 
@@ -101,12 +116,19 @@ func main() {
 		client.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	}
 
-	// Create output file if specified
+	// Create or open output file if specified
 	var output *os.File
 	if *outputFile != "" {
 		output, err = os.Create(*outputFile)
 		if err != nil {
 			fmt.Println("Error creating output file:", err)
+			return
+		}
+		defer output.Close()
+	} else if *appendOutput != "" {
+		output, err = os.OpenFile(*appendOutput, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			fmt.Println("Error opening output file for appending:", err)
 			return
 		}
 		defer output.Close()
@@ -178,9 +200,17 @@ func main() {
 					server := resp.Header.Get("Server")
 					outputStr := ""
 					if isVulnerable {
-						outputStr = fmt.Sprintf("\033[1;31mVulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+						if *noColor {
+							outputStr = fmt.Sprintf("Vulnerable: %s[%s] %s\n", status, server, domain)
+						} else {
+							outputStr = fmt.Sprintf("\033[1;31mVulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+						}
 					} else if !*onlyVulnerable { // If onlyVulnerable is false, print non-vulnerable URLs
-						outputStr = fmt.Sprintf("\033[1;35mNot Vulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+						if *noColor {
+							outputStr = fmt.Sprintf("Not Vulnerable: %s[%s] %s\n", status, server, domain)
+						} else {
+							outputStr = fmt.Sprintf("\033[1;35mNot Vulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+						}
 					}
 
 					fmt.Print(outputStr)
