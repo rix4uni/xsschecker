@@ -18,12 +18,41 @@ git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build
 ```
 ## Usage
 ```
-go run xsschecker.go -h
+xsschecker -h
 Usage: xsschecker [OPTIONS]
 
 Options:
+  -H string
+        Custom User-Agent header for HTTP requests. (default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
+  -ao string
+        File to append the output instead of overwriting.
+  -i string
+        Input file containing list of URLs.
   -match string
-        The string to match against the domain response. (required)
+        The string(s) to match against the domain response. Separate multiple strings with commas. (required) (default "alert(1), confirm(1), prompt(1)")
+  -maxssc int
+        Maximum number of status code responses required before skipping all URLs from that domain, This flag only can be use with -ssc flag. (default 20)
+  -nc
+        Do not use colored output.
+  -o string
+        File to save the output.
+  -proxy string
+        Proxy server for HTTP requests. (e.g., http://127.0.0.1:8080)
+  -retries int
+        Number of retry attempts for failed HTTP requests. (default 1)
+  -scdn string
+        Comma-separated server names to skip all URLs for (e.g., "cloudflare,AkamaiGHost,CloudFront,Imperva").
+  -ssc string
+        Comma-separated status codes to skip all URLs from a domain if encountered (e.g., 403,400).
+  -t int
+        Number of concurrent threads. (default 20)
+  -timeout int
+        Timeout for HTTP requests in seconds. (default 15)
+  -u string
+        Single URL to test.
+  -v    Enable verbose output for debugging purposes.
+  -version
+        Print the version of the tool and exit.
   -vuln
         If set, only vulnerable URLs will be printed.
 ```
