@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const version = "0.0.3"
+const version = "0.0.4"
 
 func printUsage() {
 	fmt.Println("Usage: xsschecker [OPTIONS]")
@@ -39,15 +39,15 @@ func main() {
 	appendOutput := flag.String("ao", "", "File to append the output instead of overwriting.")
 	noColor := flag.Bool("nc", false, "Do not use colored output.")
 	threads := flag.Int("t", 20, "Number of concurrent threads.")
-	userAgent := flag.String("H", "XSSChecker/1.0", "Custom User-Agent header for HTTP requests.")
+	userAgent := flag.String("H", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36", "Custom User-Agent header for HTTP requests.")
 	verbose := flag.Bool("v", false, "Enable verbose output for debugging purposes.")
-	retries := flag.Int("retries", 3, "Number of retry attempts for failed HTTP requests.")
-	proxy := flag.String("proxy", "", "Proxy server for HTTP requests.")
+	retries := flag.Int("retries", 1, "Number of retry attempts for failed HTTP requests.")
+	proxy := flag.String("proxy", "", "Proxy server for HTTP requests. (e.g., http://127.0.0.1:8080)")
 	inputFile := flag.String("i", "", "Input file containing list of URLs.")
 	singleURL := flag.String("u", "", "Single URL to test.")
-	skipStatusCodes := flag.String("ssc", "", "Comma-separated status codes to skip all URLs from a domain if encountered (e.g., 403,500).")
-	maxStatusCodeSkips := flag.Int("maxssc", 2, "Maximum number of status code responses required before skipping all URLs from that domain.")
-	skipServer := flag.String("scdn", "", "Server name to skip all URLs for (e.g., cloudflare.)")
+	skipStatusCodes := flag.String("ssc", "", "Comma-separated status codes to skip all URLs from a domain if encountered (e.g., 403,400).")
+	maxStatusCodeSkips := flag.Int("maxssc", 20, "Maximum number of status code responses required before skipping all URLs from that domain, This flag only can be use with -ssc flag.")
+	skipServer := flag.String("scdn", "", "Comma-separated server names to skip all URLs for (e.g., \"cloudflare,AkamaiGHost,CloudFront,Imperva\").")
 
 	// Custom flag parsing to handle unknown flags
 	flag.CommandLine.Init(os.Args[0], flag.ContinueOnError)
@@ -86,6 +86,9 @@ func main() {
 			skipStatusCodeList[code] = true
 		}
 	}
+
+	// Parse the skip server names into a slice
+	skipServers := strings.Split(*skipServer, ",")
 
 	sc := bufio.NewScanner(os.Stdin)
 
@@ -219,15 +222,21 @@ func main() {
 					}
 
 					// Check if the response meets the skip criteria
-					if *skipStatusCodes != "" && skipStatusCodeList[resp.StatusCode] && strings.Contains(strings.ToLower(server), strings.ToLower(*skipServer)) {
-						skippedDomainsLock.Lock()
-						skippedDomains[host]++
-						if skippedDomains[host] >= *maxStatusCodeSkips {
-							skippedDomainsLimitReached[host] = true
-							fmt.Printf("Skipped all URLs of this domain %s [ERR: Blocked by %s]\n", host, *skipServer)
+					if *skipStatusCodes != "" {
+						for _, skipServerName := range skipServers {
+							if skipStatusCodeList[resp.StatusCode] && strings.Contains(strings.ToLower(server), strings.ToLower(skipServerName)) {
+								skippedDomainsLock.Lock()
+								skippedDomains[host]++
+								if skippedDomains[host] >= *maxStatusCodeSkips {
+									skippedDomainsLimitReached[host] = true
+									if *verbose {
+										fmt.Printf("Skipped all URLs of this domain %s [ERR: Blocked by %s]\n", host, *skipServer)
+									}
+								}
+								skippedDomainsLock.Unlock()
+								break // Exit retry loop on skip condition met
+							}
 						}
-						skippedDomainsLock.Unlock()
-						break // Exit retry loop on skip condition met
 					}
 					break // Exit retry loop on successful request
 				}
