@@ -1,6 +1,6 @@
 ## xsschecker
 
-xsschecker tool checking reflected endpoints finding possible xss vulnerable endpoints.
+xsschecker tests endpoints for reflected XSS by injecting payloads and checking responses. It prints vulnerable if the payload is reflected, otherwise not vulnerable.
 
 ## Installation
 ```
