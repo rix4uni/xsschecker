@@ -23,7 +23,7 @@ cd xsschecker; go install
 ```
 
 ## Usage
-```
+```yaml
 Usage: xsschecker [OPTIONS]
 
 Options:
@@ -66,7 +66,7 @@ Options:
 
 ## Usage Examples
 ### Reflected XSS Mass Automation
-```
+```yaml
 ▶ Step 1:
 wget https://raw.githubusercontent.com/rix4uni/WordList/refs/heads/main/payloads/xss/favourite.txt
 if grep -qv "^rix4uni" "favourite.txt";then sed -i 's/^/rix4uni/' "favourite.txt";fi
@@ -81,7 +81,7 @@ You can run pyxss to check false positive or check manually one by one url in ch
 ```
 
 ### Reflected XSS Oneliner for 1 payload
-```
+```yaml
 ▶ Step 1:
 echo "testphp.vulnweb.com" | waybackurls | urldedupe -s | grep -aE '=|%3D' | \
 egrep -aiv '.(jpg|jpeg|gif|css|tif|tiff|png|ttf|woff|woff2|icon|pdf|svg|txt|js)' | \
